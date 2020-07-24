@@ -1,0 +1,11 @@
+{
+  "name": "sadbot",
+  "version": "1.0.0",
+  "description": "Anti Gif Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "Redoran",
+  "license": "ISC"
+}
