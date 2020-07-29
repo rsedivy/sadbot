@@ -4,6 +4,8 @@ A discord bot to crack down on discord gif spam. Will instantly delete any messa
 
 This bot was only created to work with a single server at a time, hence the requirement for your discord server ID in the config file.
 
+Either ask Redoran for the bot invite link, or host and set up the server yourself.
+
 ## Sadbot commands
 
     ?sadbot | ?sadbot about         : Display bot info
