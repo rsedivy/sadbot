@@ -8,8 +8,10 @@ Either ask Redoran for the bot invite link, or host and set up the server yourse
 
 ## Sadbot commands
 
+    ---- Commands for all ----
     ?sadbot | ?sadbot about         : Display bot info
     ?sadbot help                    : Show this help message
+    ---- Commands for server manager and up -----
     ?sadbot nogif                   : Stops Happy/Hannerz from posting gifs for 10 minutes (hardcoded)
     ?sadbot nogif <@user>           : Stops a user from posting gifs for 10 minutes
     ?sadbot nogif <@user> <min>     : Stops a user from posting gifs for <min> minutes
