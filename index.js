@@ -1,5 +1,19 @@
 /**
  * Created by Redoran on 20/07/24.
+ *
+ * This is all really ugly and bad code
+ * pls ignore
+ *
+ * will be improved later.. hopefully
+ */
+
+/*
+TODO:
+    - Switch all of this to a database, mongodb probably
+    - Don't use switch for commands, split into different files
+    - Create proper config file that updates n stuff
+    - Add more moderation tools than just gif stuff
+    - Add basic functionality
  */
 
 
@@ -56,7 +70,7 @@ client.once('ready', () => {
 client.login(config.token);
 
 client.on('message', message => {
-    console.log(message.content);
+
     if(message.content.startsWith("?sadbot")){
         const args = message.content.slice(1).trim().split(/ +/);
         const command = args.shift().toLowerCase();
@@ -68,9 +82,47 @@ client.on('message', message => {
             case 'nogif':
                 if(args[2]){
                     //console.log(args[1])
+                    if(message.mentions.members.size == 1){
+
+
+                    }else if(message.mentions.channels.size == 1){
+                        console.log("channel mentioned");
+                    }else{
+                        // no correct mention was provided
+                    }
+
                 }
                 else if(args[1]){
+                    if(message.mentions.members.size == 1){
 
+                        let found = userBlacklist.find(x => {
+                            return (x[0] == message.mentions.users.first().id)
+                        });
+
+                        if(found != undefined){
+                            found[1] = 10*60*1000 + Date.now();
+                        }else{
+                            userBlacklist.push([message.mentions.users.first().id, 10*60*1000 + Date.now()]);
+                        }
+
+                        updateFile("./userGifBlacklist", userBlacklist);
+
+                    }else if(message.mentions.channels.size == 1){
+
+                        let found = userBlacklist.find(x => {
+                            return (x[0] == message.mentions.users.first().id)
+                        });
+
+                        if(found != undefined){
+                            found[1] = 10*60*1000 + Date.now();
+                        }else{
+                            userBlacklist.push([message.mentions.users.first().id, 10*60*1000 + Date.now()]);
+                        }
+
+                        updateFile("./userGifBlacklist", userBlacklist);
+                    }else{
+                        // no correct mention was provided
+                    }
                 }
                 else{
                     // yes this is hardcoded to nogif Happy
@@ -106,4 +158,18 @@ function about(channel){
     channel.send("SadBot v1.0.\n" +
         "Created by Redoran\n" +
         "Use ?sadbot help for command list");
+}
+
+function updateFile(filename, newArr){
+    let data = "";
+
+    newArr.forEach(e => {
+        data += e[0]+"|"+e[1]+"\n";
+    })
+
+    fs.writeFile(filename, data, "utf8", (err) => {
+        if(err){
+            console.error(`Updating ${filename} has failed. Error log below:\n`+err);
+        }
+    })
 }
