@@ -79,61 +79,50 @@ client.on('message', message => {
             case 'help':
                 help(message.channel);
                 break;
-            case 'nogif':
-                if(args[2]){
-                    //console.log(args[1])
-                    if(message.mentions.members.size == 1){
-
-
-                    }else if(message.mentions.channels.size == 1){
-                        console.log("channel mentioned");
-                    }else{
-                        // no correct mention was provided
-                    }
-
-                }
-                else if(args[1]){
-                    if(message.mentions.members.size == 1){
-
-                        let found = userBlacklist.find(x => {
-                            return (x[0] == message.mentions.users.first().id)
-                        });
-
-                        if(found != undefined){
-                            found[1] = 10*60*1000 + Date.now();
-                        }else{
-                            userBlacklist.push([message.mentions.users.first().id, 10*60*1000 + Date.now()]);
-                        }
-
-                        updateFile("./userGifBlacklist", userBlacklist);
-
-                    }else if(message.mentions.channels.size == 1){
-
-                        let found = userBlacklist.find(x => {
-                            return (x[0] == message.mentions.users.first().id)
-                        });
-
-                        if(found != undefined){
-                            found[1] = 10*60*1000 + Date.now();
-                        }else{
-                            userBlacklist.push([message.mentions.users.first().id, 10*60*1000 + Date.now()]);
-                        }
-
-                        updateFile("./userGifBlacklist", userBlacklist);
-                    }else{
-                        // no correct mention was provided
-                    }
-                }
-                else{
-                    // yes this is hardcoded to nogif Happy
-                    message.channel.send("No user specified. Muting <@!684410145496891403>");
-                }
-                break;
             default:
                 about(message.channel);
                 break;
         }
 
+        if(message.member.permissions.has("MANAGE_GUILD")){
+            switch(args[0]){
+                case 'nogif':
+                    if(args[2]){
+                        if(message.mentions.members.size == 1){
+
+                        }else if(message.mentions.channels.size == 1){
+                            console.log("channel mentioned");
+                        }else{
+                            // no correct mention was provided
+                        }
+
+                    }
+                    else if(args[1]){
+                        if(message.mentions.members.size == 1){
+
+                            blacklistUser(message.mentions.users.first().id, 10);
+
+                        }else if(message.mentions.channels.size == 1){
+                            blacklistChannel(message.mentions.channels.first().id, 10);
+                        }else{
+                            // no correct mention was provided
+                        }
+                    }
+                    else{
+                        // yes this is hardcoded to nogif Happy
+                        message.channel.send("No user specified. Muting <@!684410145496891403>");
+                    }
+                    break;
+                case 'gif':
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    }else if(hasDisallowedGif(message)){
+        message.delete();
+        console.log(`Deleting message from ${message.author.username}`)
     }
 });
 
@@ -160,6 +149,35 @@ function about(channel){
         "Use ?sadbot help for command list");
 }
 
+function blacklistUser(userID, time){
+
+    let found = userBlacklist.find(x => {
+        return (x[0] == userID)
+    });
+
+    if(found != undefined){
+        found[1] = time*60*1000 + Date.now();
+    }else{
+        userBlacklist.push([userID, time*60*1000 + Date.now()]);
+    }
+
+    updateFile("./userGifBlacklist", userBlacklist);
+}
+
+function blacklistChannel(channelID, time){
+    let found = channelBlacklist.find(x => {
+        return (x[0] == message.mentions.channels.first().id)
+    });
+
+    if(found != undefined){
+        found[1] = 10*60*1000 + Date.now();
+    }else{
+        channelBlacklist.push([channelID, 10*60*1000 + Date.now()]);
+    }
+
+    updateFile("./channelGifBlacklist", userBlacklist);
+}
+
 function updateFile(filename, newArr){
     let data = "";
 
@@ -172,4 +190,45 @@ function updateFile(filename, newArr){
             console.error(`Updating ${filename} has failed. Error log below:\n`+err);
         }
     })
+}
+
+/**
+ * 2 AM code right here
+ *
+ * bound to be some good stuff
+ */
+function hasDisallowedGif(message){
+    let cindex, uindex;
+    const c = channelBlacklist.find((x,i) => {
+        if(x[0] == message.channel.id){
+            cindex = i;
+            return true;
+        }else{
+            return false;
+        }
+    });
+    const u = userBlacklist.find((x,i) => {
+        if(x[0] == message.author.id){
+            uindex = i;
+            return true;
+        }else{
+            return false;
+        }
+    });
+
+    if(c){
+        if(c[1] <= Date.now() || c[1] === 0){
+            return true;
+        }else{
+            channelBlacklist.splice(cindex, 1);
+            return false;
+        }
+    }else if(u){
+        if(u[1] <= Date.now() || u[1] === 0){
+            userBlacklist.splice(uindex, 1);
+            return false;
+        }
+    }else{
+        return false;
+    }
 }
